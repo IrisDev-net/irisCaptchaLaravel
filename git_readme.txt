@@ -1,6 +1,8 @@
 git config --global http.proxy http://185.235.40.171:1314
 git config --global https.proxy http://185.235.40.171:1314
 ////////////////////////////////////
+composer update --no-scripts
+////////////////////////////////////
 Git global setup
 
 git config --global user.name "hamed"
@@ -50,3 +52,38 @@ But it would be better to just get rid of the warnings using
 git config core.autocrlf true
 
 //////////////////////////////////////////
+
+
+
+    Clone the github repo:
+
+git clone https://github.com/SagarMaheshwary/laravel-react-beginners.git
+
+    Go the project directory:
+
+cd laravel-react-beginners
+
+    Install the project dependencies:
+
+composer install
+
+    Copy the .env.example to .env or simly rename it:
+
+If linux:
+
+cp .env.example .env
+
+If windows:
+
+copy .env.example .env
+
+    Create the application key:
+
+php artisan key:generate
+
+    Start the laravel server:
+
+php artisan serve
+
+
+///////////////////////////////////////////

@@ -18,9 +18,9 @@ Route::get('/', function (Request $request) {
     //$cl=new \IrisDev\IrisCaptcha\IrisCaptcha;
     //return $cl::event();
     $irisCaptcha=new \IrisDev\IrisCaptcha\IrisCaptcha;
-    
+    // var_dump($request->ip());die();
         if($request->has("irisCaptcha")) {
-            $res = $irisCaptcha->Check_Answer($request->irisCaptcha,$request->ip(),true);
+            $res = $irisCaptcha->Check_Answer($request->irisCaptcha,$request->ip(),false);
             //var_dump($request->get["irisCaptcha"]);die();
             if ($res->is_valid) {
                 // Captcha verified - continue ...

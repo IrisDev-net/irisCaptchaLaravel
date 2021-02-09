@@ -63,7 +63,7 @@ class IrisCaptcha
     Private function _irisCaptcha_http_post($host, $path, $data, $port = 443) {
 
         $req = $this->_irisCaptcha_qsencode($data);
-
+        
         $http_request  = "POST $path HTTP/1.1\r\n";
         $http_request .= "Host: $host\r\n";
         $http_request .= "Content-Type: application/x-www-form-urlencoded;\r\n";
@@ -72,17 +72,17 @@ class IrisCaptcha
         $http_request .= 'Connection: close' . "\r\n";
         $http_request .= "\r\n";
         $http_request .= $req;
-
+        
         $response = '';
         if( false == ( $fs = @fsockopen('ssl://'. $host, $port, $errno, $errstr, 10) ) ) {
             throw new OpenSocketException;
             return;
         }
-
+        
         fwrite($fs, $http_request);
-
+        
         while ( !feof($fs) )
-                $response .= fgets($fs, 1024); // One TCP-IP packet
+        $response .= fgets($fs, 1024); // One TCP-IP packet
         fclose($fs);
         $response = explode("\r\n\r\n", $response, 2);
 
@@ -108,7 +108,6 @@ class IrisCaptcha
             if ($remoteip == null || $remoteip == '') {
                 die ("For security reasons, you must pass the remote ip to IrisCaptcha");
             }
-
             //discard spam submissions
             if ( $response == null || strlen($response) == 0) {
                     $irisCaptcha_response = new IrisCaptchaResponse();
@@ -117,16 +116,18 @@ class IrisCaptcha
                     return $irisCaptcha_response;
             }
 
-            $response = $this->_irisCaptcha_http_post (IrisCaptcha_VERIFY_SERVER, "/check",
+
+            $response = $this->_irisCaptcha_http_post(IrisCaptcha_VERIFY_SERVER, "/check",
                                                 array (
                                                         'secret' => $this->Secret,
                                                         'remoteip' => $remoteip,
                                                         'response' => $response
                                                         ) + $extra_params
                                                 );
-            $answers = json_decode( $response [1]);
-            $irisCaptcha_response = new IrisCaptchaResponse();
 
+            $answers = json_decode( $response[1]);
+
+            $irisCaptcha_response = new IrisCaptchaResponse();
             if ($answers->Success) {
                     $irisCaptcha_response->is_valid = true;
             }
@@ -164,7 +165,7 @@ class IrisCaptcha
         }
         
 
-        if($decoded->ip != $remoteip ) {
+        if($decoded->ip != $remoteip && $remoteip !="127.0.0.1" && $remoteip !="::1" ) {
             $irisCaptcha_response = new IrisCaptchaResponse();
             $irisCaptcha_response->is_valid = FALSE;
             $irisCaptcha_response->error = "The Ip of user and token does not match";
@@ -180,11 +181,18 @@ class IrisCaptcha
 
 
     Public function Check_Answer ($response, $remoteip, $SignaturePreferration=false, $extra_params = array()){
+        $res=NULL;
+
         if(!$SignaturePreferration){
             try {
+
                 $res = $this->Check_Answer_Remote($response, $remoteip, $extra_params);
+
             } catch (\Throwable $th) {
+
                 $res =  $this->Check_Answer_Signature($response, $remoteip);
+
+                dd($th);
             } finally {
                 if ($res == NULL) {
                     $res =   new IrisCaptchaResponse();
@@ -194,9 +202,9 @@ class IrisCaptcha
                 return $res;
             }
         }else{
-            $res=  $this->Check_Answer_Signature($response, $remoteip);
+            // $res=  $this->Check_Answer_Signature($response, $remoteip);
             try {
-                //$res =  $this->Check_Answer_Signature($response, $remoteip);
+                $res =  $this->Check_Answer_Signature($response, $remoteip);
             } catch (\Throwable $th) {
                 $res = $this->Check_Answer_Remote($response, $remoteip, $extra_params);
             } finally {
