@@ -1,0 +1,17 @@
+{
+    "name": "irisdev/iriscaptcha",
+    "description": "A Package To Use IrisCaptcha",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "IrisDev\\IrisCaptcha\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel":{
+            "providers":[
+                "IrisDev\\IrisCaptcha\\IrisCaptchaServiceProvider"
+            ]
+        }
+    }
+}
