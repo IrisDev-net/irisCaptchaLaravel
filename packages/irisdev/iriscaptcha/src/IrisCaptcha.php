@@ -1,4 +1,33 @@
-<?php
+<?PHP
+
+/*
+example 
+//* another page.php
+require "irisCaptcha.lib.php";
+$irisCaptchaPublicKey = "-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAh+qPUxi6QYz7T22NdHcI
+k3JxGQ4yzgaM+b+ReHHjnxy/o9FQ0bAU8B/jwAWGMAhtFoj6ERmbYEgWwUMy4yJ5
+f0EFfrzcbSKkI+lr5LejyjocxxA5PI5tNLPTVrQMC/5kkHpylN5mTmcDFz3zT6EQ
+EFJzJ+zRBdoQNIc3CW2WSA5vK2042iZRhOsbTWbxaP0TK+lqbcQSoWRAFBTOA4ZF
+6PSTlO84p9M6/JkoyRPDYplVqXq+HMLs9uFHal3rN+KjQ2E7g0poFkvfXgGC0nUh
+lMoLQBdSB1yT7oJc9Mua+/4Z1e1ma47d/kNxV+U5GjOfLHfqMo7xcfwocQ7ky+be
+MQIDAQAB
+-----END PUBLIC KEY-----";
+$irisCaptcha = new IrisCaptcha("your secret",$irisCaptchaPublicKey);
+
+...
+
+ $res = $irisCaptcha->Check_Answer($_POST["irisCaptcha"],$_SERVER['REMOTE_ADDR'],true);
+
+    if ($res->is_valid) {
+        //* Captcha verified - continue ...
+        echo "HOOOORAAAA";
+    }else{
+        echo $res->error;
+    }
+
+*/
+
 
 namespace IrisDev\IrisCaptcha;
 
@@ -12,7 +41,6 @@ class SignatureInvalidException extends \UnexpectedValueException {
         return "Invalid Signature";
     }
 }
-
 class BeforeValidException extends \UnexpectedValueException {
     public function __toString()
     {
@@ -37,13 +65,13 @@ class ExpiredException extends \UnexpectedValueException {}
 
 
 
+
 class IrisCaptcha
 {
-    Private $PublicKey = null;
-    Private $UniqId = null;
-    Private $Secret = null;
+    Private $PublicKey = null ;
+    Private $UniqId = null ;
+    Private $Secret = null ;
     Public $Key = null;
-
 
     Public function __construct() {
         
@@ -54,36 +82,44 @@ class IrisCaptcha
     }
 
     Public function Get_HTML() {
-        return "<iris-captcha name='irisCaptcha' id='irisCaptcha' ></iris-captcha>";
-    }
+                return "<iris-captcha name='irisCaptcha' id='irisCaptcha' ></iris-captcha>";
+        }
     Public function Get_Js() {
-        return "<script src='".IrisCaptcha_JS_SERVER."/$this->UniqId' ></script>";
+            return "<script src='".IrisCaptcha_JS_SERVER."/$this->UniqId' ></script>";
     }
-
     Private function _irisCaptcha_http_post($host, $path, $data, $port = 443) {
 
-        $req = $this->_irisCaptcha_qsencode($data);
-        
+        // prepaire the raw body
+        $rawBody = $this->_irisCaptcha_qsencode($data);
+        // prepaire the raw packets
         $http_request  = "POST $path HTTP/1.1\r\n";
         $http_request .= "Host: $host\r\n";
         $http_request .= "Content-Type: application/x-www-form-urlencoded;\r\n";
-        $http_request .= "Content-Length: " . strlen($req) . "\r\n";
+        $http_request .= "Content-Length: " . strlen($rawBody) . "\r\n";
         $http_request .= "User-Agent: IrisCaptchaLib/PHP/v".LibVersion."\r\n";
         $http_request .= 'Connection: close' . "\r\n";
         $http_request .= "\r\n";
-        $http_request .= $req;
-        
+        $http_request .= $rawBody;
+
         $response = '';
-        if( false == ( $fs = @fsockopen('ssl://'. $host, $port, $errno, $errstr, 10) ) ) {
+
+        // opening Socket port
+        $fs = @fsockopen("ssl://". $host, 443, $errno, $errstr, 10);
+        if( $fs == false ) {
             throw new OpenSocketException;
             return;
         }
-        
+
+        // write packets
         fwrite($fs, $http_request);
-        
+
+        // read packets
         while ( !feof($fs) )
-        $response .= fgets($fs, 1024); // One TCP-IP packet
+                $response .= fgets($fs, 1024); // One TCP-IP packet
+        // close the socket
         fclose($fs);
+
+        // processing the response
         $response = explode("\r\n\r\n", $response, 2);
 
         return $response;
@@ -92,7 +128,7 @@ class IrisCaptcha
     Private function _irisCaptcha_qsencode ($data) {
             $req = "";
             foreach ( $data as $key => $value )
-                    $req .= $key . '=' . urlencode( stripslashes($value) ) . '&';
+                    $req .= $key . '=' . urlencode( stripslashes($value) ) . "&";
 
             // Cut the last '&'
             $req=substr($req,0,strlen($req)-1);
@@ -108,6 +144,7 @@ class IrisCaptcha
             if ($remoteip == null || $remoteip == '') {
                 die ("For security reasons, you must pass the remote ip to IrisCaptcha");
             }
+
             //discard spam submissions
             if ( $response == null || strlen($response) == 0) {
                     $irisCaptcha_response = new IrisCaptchaResponse();
@@ -115,9 +152,11 @@ class IrisCaptcha
                     $irisCaptcha_response->error = 'Incorrect User Response';
                     return $irisCaptcha_response;
             }
-
-
-            $response = $this->_irisCaptcha_http_post(IrisCaptcha_VERIFY_SERVER, "/check",
+            if (config('iriscaptcha.IrisCaptcha_Developing_Mode')==TRUE)
+            {
+                $remoteip=''; 
+            }
+            $response = $this->_irisCaptcha_http_post (IrisCaptcha_VERIFY_SERVER, "/check",
                                                 array (
                                                         'secret' => $this->Secret,
                                                         'remoteip' => $remoteip,
@@ -125,17 +164,22 @@ class IrisCaptcha
                                                         ) + $extra_params
                                                 );
 
-            $answers = json_decode( $response[1]);
+        $response = explode("{",$response[1],2);
+        $response = explode("}",strrev($response[1]),2);
 
-            $irisCaptcha_response = new IrisCaptchaResponse();
-            if ($answers->Success) {
-                    $irisCaptcha_response->is_valid = true;
-            }
-            else {
-                    $irisCaptcha_response->is_valid = false;
-                    $irisCaptcha_response->error = $answers->Message;
-            }
-            return $irisCaptcha_response;
+        $response = "{" . strrev($response[1])."}";
+
+        $answers = json_decode($response);
+        $irisCaptcha_response = new IrisCaptchaResponse();
+
+        if ($answers->Success) {
+                $irisCaptcha_response->is_valid = true;
+        }
+        else {
+                $irisCaptcha_response->is_valid = false;
+                $irisCaptcha_response->error = $answers->Message;
+        }
+        return $irisCaptcha_response;
 
         }
 
@@ -165,7 +209,7 @@ class IrisCaptcha
         }
         
 
-        if($decoded->ip != $remoteip && $remoteip !="127.0.0.1" && $remoteip !="::1" ) {
+        if($decoded->ip != $remoteip && $remoteip!='::1' && $remoteip!= '127.0.0.1' ) {
             $irisCaptcha_response = new IrisCaptchaResponse();
             $irisCaptcha_response->is_valid = FALSE;
             $irisCaptcha_response->error = "The Ip of user and token does not match";
@@ -179,20 +223,34 @@ class IrisCaptcha
         return $irisCaptcha_response;
     }
 
-
-    Public function Check_Answer ($response, $remoteip, $SignaturePreferration=false, $extra_params = array()){
-        $res=NULL;
-
+    /**
+     * Check the user Response and return the value 
+     *
+     * @param string                    $response               The User Response
+     * @param string                    $remoteip               The User IP - for security reasons it's necessary 
+     * @param bool                      $SignaturePreferration  Specify that is validation with public key is preferred or not - if invalid Signature accored , it will try to check with server
+     * @param array                     $extra_params           Extra parameters to send for irisdev server.
+     *                                                  
+     * 
+     * 
+     * @return object IrisCaptchaResponse  The Standard Response to check Status - get $IrisCaptchaResponse->is_valid (bool) | get $IrisCaptchaResponse->error (string)
+     *
+     * @throws UnexpectedValueException     Provided JWT was invalid
+     * @throws SignatureInvalidException    Provided JWT was invalid because the signature verification failed
+     * @throws BeforeValidException         Provided JWT is trying to be used before it's eligible as defined by 'nbf'
+     * @throws BeforeValidException         Provided JWT is trying to be used before it's been created as defined by 'iat'
+     * @throws ExpiredException             Provided JWT has since expired, as defined by the 'exp' claim
+     *
+     * @uses Check_Answer_Remote
+     * @uses Check_Answer_Signature
+     */
+    Public function Check_Answer ( $response, $remoteip, $SignaturePreferration=false, $extra_params = array()){
+        $res = NULL;
         if(!$SignaturePreferration){
             try {
-
                 $res = $this->Check_Answer_Remote($response, $remoteip, $extra_params);
-
             } catch (\Throwable $th) {
-
                 $res =  $this->Check_Answer_Signature($response, $remoteip);
-
-                dd($th);
             } finally {
                 if ($res == NULL) {
                     $res =   new IrisCaptchaResponse();
@@ -202,7 +260,6 @@ class IrisCaptcha
                 return $res;
             }
         }else{
-            // $res=  $this->Check_Answer_Signature($response, $remoteip);
             try {
                 $res =  $this->Check_Answer_Signature($response, $remoteip);
             } catch (\Throwable $th) {
@@ -217,23 +274,16 @@ class IrisCaptcha
             }
         }
     }
-
-
-    public  static function event()
-    {
-        //$myconfig=config('iriscaptcha.api_key');
-        
-        return config('iriscaptcha.IrisCaptcha_Publick_Key');
+    
     }
 
-}
-
-
+/**
+ * A IrisCaptchaResponse is returned from IrisCaptcha->Check_Answer()
+ */
 class IrisCaptchaResponse {
-    var $is_valid;
-    var $error;
+        var $is_valid;
+        var $error;
 }
-
 
 class JWK
 {
