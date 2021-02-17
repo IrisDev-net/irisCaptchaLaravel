@@ -12,6 +12,10 @@ composer require irisdev/iriscaptchalaravel
 php artisan vendor:publish
 
 
+Select Number in list laravel service worker irisdev
+
+
+
 Adding This Line To Env  
 
 Note : This Value Changed For Your Registered Option In irisdev.net
