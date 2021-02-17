@@ -1,22 +1,22 @@
 <?php
-namespace IrisDev\irisCaptchaLaravel;
+namespace IrisDev\iriscaptchalaravel;
 
 use Illuminate\Support\ServiceProvider;
 
-class irisCaptchaLaravelServiceProvider extends ServiceProvider
+class iriscaptchalaravelServiceProvider extends ServiceProvider
 {
        public function boot()
        {
            // dd("Package Hello");
            $this->publishes([
-                __DIR__.'/../config/irisCaptchaLaravel.php' => config_path('irisCaptchaLaravel.php')
+                __DIR__.'/../config/iriscaptchalaravel.php' => config_path('iriscaptchalaravel.php')
            ]);
        }
 
        public function register()
        {
-           $this->app->singleton(irisCaptchaLaravel::class,function(){
-                 return new irisCaptchaLaravel();
+           $this->app->singleton(iriscaptchalaravel::class,function(){
+                 return new iriscaptchalaravel();
            });
        }
 } 

@@ -1,16 +1,16 @@
 {
-    "name": "irisdev/irisCaptchaLaravel",
-    "description": "A Package To Use irisCaptchaLaravel",
+    "name": "irisdev/iriscaptchalaravel",
+    "description": "A Package To Use iriscaptchalaravel",
     "require": {},
     "autoload": {
         "psr-4": {
-            "IrisDev\\irisCaptchaLaravel\\": "src/"
+            "IrisDev\\iriscaptchalaravel\\": "src/"
         }
     },
     "extra": {
         "laravel":{
             "providers":[
-                "IrisDev\\irisCaptchaLaravel\\irisCaptchaLaravelServiceProvider"
+                "IrisDev\\iriscaptchalaravel\\iriscaptchalaravelServiceProvider"
             ]
         }
     }
