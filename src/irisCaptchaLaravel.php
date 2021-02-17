@@ -29,8 +29,6 @@ $irisCaptcha = new IrisCaptcha("your secret",$irisCaptchaPublicKey);
 */
 
 
-
-
 namespace IrisDev\iriscaptchalaravel;
 
 define("LibVersion","1");
