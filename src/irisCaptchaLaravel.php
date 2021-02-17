@@ -29,7 +29,7 @@ $irisCaptcha = new IrisCaptcha("your secret",$irisCaptchaPublicKey);
 */
 
 
-namespace IrisDev\IrisCaptcha;
+namespace IrisDev\irisCaptchaLaravel;
 
 define("LibVersion","1");
 define("IrisCaptcha_VERIFY_SERVER", "captcha.irisdev.net");
@@ -66,7 +66,7 @@ class ExpiredException extends \UnexpectedValueException {}
 
 
 
-class IrisCaptcha
+class irisCaptchaLaravel
 {
     Private $PublicKey = null ;
     Private $UniqId = null ;
@@ -75,10 +75,10 @@ class IrisCaptcha
 
     Public function __construct() {
         
-        $this->Secret = config('iriscaptcha.IrisCaptcha_Secret_Key');
-        $ss = explode("0x",config('iriscaptcha.IrisCaptcha_Secret_Key'));
+        $this->Secret = config('irisCaptchaLaravel.IrisCaptcha_Secret_Key');
+        $ss = explode("0x",config('irisCaptchaLaravel.IrisCaptcha_Secret_Key'));
         $this->UniqId = "0x".end($ss);
-        $this->PublicKey = config('iriscaptcha.IrisCaptcha_Publick_Key');
+        $this->PublicKey = config('irisCaptchaLaravel.IrisCaptcha_Publick_Key');
     }
 
     Public function Get_HTML() {
@@ -152,7 +152,7 @@ class IrisCaptcha
                     $irisCaptcha_response->error = 'Incorrect User Response';
                     return $irisCaptcha_response;
             }
-            if (config('iriscaptcha.IrisCaptcha_Developing_Mode')==TRUE)
+            if (config('irisCaptchaLaravel.IrisCaptcha_Developing_Mode')==TRUE)
             {
                 $remoteip=''; 
             }
