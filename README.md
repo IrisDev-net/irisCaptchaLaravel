@@ -2,6 +2,8 @@
 
 IrisCaptchaLaravel is a PHP library for use in Laravel Freamwork.
 
+Note: This Package Using Only in Laravel 7 & Laravel 8
+
 ## Installation
 
 Use Composer in root Project Folder Laraverl to install IrisCaptchaLaravel.
